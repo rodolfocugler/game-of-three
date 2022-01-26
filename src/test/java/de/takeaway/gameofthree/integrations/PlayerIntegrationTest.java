@@ -12,11 +12,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,8 +57,21 @@ public class PlayerIntegrationTest {
     this.mockMvc.perform(post("/api/players")
             .content(mapper.writeValueAsString(player))
             .contentType(MediaType.APPLICATION_JSON))
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(jsonPath("$.message").value("Username already exists."))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Username already exists."));
+  }
+
+  @Test
+  public void shouldReturnAListOfPlayers() throws Exception {
+    this.mockMvc.perform(post("/api/players")
+            .content(mapper.writeValueAsString(player))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+    this.mockMvc.perform(get("/api/players")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].username").value("username"));
   }
 }

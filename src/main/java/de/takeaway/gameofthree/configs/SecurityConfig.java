@@ -21,7 +21,6 @@ import java.util.Collections;
 import static de.takeaway.gameofthree.configs.AuthenticationConfig.HEADER_STRING;
 import static de.takeaway.gameofthree.configs.AuthenticationConfig.SIGN_UP_URL;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
