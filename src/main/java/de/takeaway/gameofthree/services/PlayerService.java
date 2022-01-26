@@ -1,5 +1,6 @@
 package de.takeaway.gameofthree.services;
 
+import de.takeaway.gameofthree.dtos.PlayerAuthenticationDTO;
 import de.takeaway.gameofthree.dtos.PlayerDTO;
 import de.takeaway.gameofthree.exceptions.InvalidInputException;
 import de.takeaway.gameofthree.models.Player;
@@ -12,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PlayerService implements UserDetailsService {
@@ -59,7 +62,13 @@ public class PlayerService implements UserDetailsService {
       throw new UsernameNotFoundException(username.trim());
     }
 
-    return new PlayerDTO(player.getUsername(), player.getPassword(), Collections.emptyList(),
+    return new PlayerAuthenticationDTO(player.getUsername(), player.getPassword(), Collections.emptyList(),
             player.getId());
+  }
+
+  public List<PlayerDTO> get() {
+    return playerRepository.findAll().stream().map(player ->
+            PlayerDTO.builder().id(player.getId()).username(player.getUsername()).build())
+            .collect(Collectors.toList());
   }
 }

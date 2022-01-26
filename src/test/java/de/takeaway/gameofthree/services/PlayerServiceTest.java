@@ -1,5 +1,6 @@
 package de.takeaway.gameofthree.services;
 
+import de.takeaway.gameofthree.dtos.PlayerAuthenticationDTO;
 import de.takeaway.gameofthree.dtos.PlayerDTO;
 import de.takeaway.gameofthree.exceptions.InvalidInputException;
 import de.takeaway.gameofthree.models.Player;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,6 +36,7 @@ public class PlayerServiceTest {
           Player.builder().username("username").password("password").build();
   private final Player dbPlayer = Player.builder().username("username").password("asd").id(1)
           .build();
+  private final PlayerDTO playerDto = PlayerDTO.builder().username("username").id(1).build();
 
   @Test
   public void shouldReturnNewPlayerIfANewPlayerIsCreated() {
@@ -112,18 +115,28 @@ public class PlayerServiceTest {
   @Test
   public void shouldReturnUserIfUsernameIsPresent() {
     when(playerRepository.findByUsername("dummy")).thenReturn(dbPlayer);
-    PlayerDTO expectedPlayer = new PlayerDTO(dbPlayer.getUsername(), dbPlayer.getPassword(),
+    PlayerAuthenticationDTO expectedPlayer = new PlayerAuthenticationDTO(dbPlayer.getUsername(), dbPlayer.getPassword(),
             Collections.emptyList(), dbPlayer.getId());
 
-    PlayerDTO player = (PlayerDTO) playerService.loadUserByUsername("dummy");
+    PlayerAuthenticationDTO player = (PlayerAuthenticationDTO) playerService.loadUserByUsername("dummy");
 
 
     assertThat(player).isEqualTo(expectedPlayer);
   }
 
-
   @Test
   public void shouldThrowUsernameNotFoundExceptionIfUsernameIsNotPresent() {
     assertThrows(UsernameNotFoundException.class, () -> playerService.loadUserByUsername("dummy"));
+  }
+
+  @Test
+  public void shouldReturnAListOfPlayers() {
+    List<PlayerDTO> playersDto = List.of(playerDto, playerDto, playerDto);
+    List<Player> players = List.of(dbPlayer, dbPlayer, dbPlayer);
+    when(playerRepository.findAll()).thenReturn(players);
+
+    List<PlayerDTO> response = playerService.get();
+
+    assertThat(response).isEqualTo(playersDto);
   }
 }

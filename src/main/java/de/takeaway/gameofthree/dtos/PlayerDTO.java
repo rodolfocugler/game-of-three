@@ -1,20 +1,28 @@
 package de.takeaway.gameofthree.dtos;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import lombok.*;
 
-import java.util.Collection;
+import java.util.Objects;
 
-public class PlayerDTO extends User {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class PlayerDTO {
+  private long id;
+  private String username;
 
-  private final long id;
-
-  public PlayerDTO(String username, String password, Collection<? extends GrantedAuthority> authorities, long id) {
-    super(username, password, authorities);
-    this.id = id;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    PlayerDTO playerDTO = (PlayerDTO) o;
+    return id == playerDTO.id && Objects.equals(username, playerDTO.username);
   }
 
-  public long getId() {
-    return id;
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, username);
   }
 }

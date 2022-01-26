@@ -1,7 +1,7 @@
 package de.takeaway.gameofthree.interceptors;
 
 import com.auth0.jwt.JWT;
-import de.takeaway.gameofthree.dtos.PlayerDTO;
+import de.takeaway.gameofthree.dtos.PlayerAuthenticationDTO;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,7 +41,7 @@ public class JWTAuthenticationInterceptor extends UsernamePasswordAuthentication
                                           FilterChain chain,
                                           Authentication auth) {
 
-    PlayerDTO user = ((PlayerDTO) auth.getPrincipal());
+    PlayerAuthenticationDTO user = ((PlayerAuthenticationDTO) auth.getPrincipal());
     String token = JWT.create()
             .withSubject(user.getUsername())
             .withClaim("id", user.getId())
