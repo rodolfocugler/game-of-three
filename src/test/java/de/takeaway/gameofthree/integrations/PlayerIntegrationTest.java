@@ -29,7 +29,7 @@ public class PlayerIntegrationTest {
   private WebApplicationContext webApplicationContext;
   private MockMvc mockMvc;
   private final ObjectMapper mapper = new ObjectMapper();
-  private final Player player = Player.builder().username("username").build();
+  private final Player player = Player.builder().username("username").password("123456").build();
 
   @BeforeEach
   public void setup() {
