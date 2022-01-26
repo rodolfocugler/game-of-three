@@ -40,7 +40,6 @@ public class JWTAuthenticationInterceptor extends UsernamePasswordAuthentication
                                           HttpServletResponse res,
                                           FilterChain chain,
                                           Authentication auth) {
-
     PlayerAuthenticationDTO user = ((PlayerAuthenticationDTO) auth.getPrincipal());
     String token = JWT.create()
             .withSubject(user.getUsername())
