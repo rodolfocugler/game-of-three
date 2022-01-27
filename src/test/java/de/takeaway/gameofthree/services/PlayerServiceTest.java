@@ -15,7 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -138,5 +140,22 @@ public class PlayerServiceTest {
     List<PlayerDTO> response = playerService.get();
 
     assertThat(response).isEqualTo(playersDto);
+  }
+
+  @Test
+  public void shouldReturnOnePlayerGivenTheId() {
+    when(playerRepository.findById(dbPlayer.getId())).thenReturn(of(dbPlayer));
+    Player expectedResponse = Player.builder().username("username").id(1).build();
+
+    Player response = playerService.findById(dbPlayer.getId());
+
+    assertThat(response).isEqualTo(expectedResponse);
+  }
+
+  @Test
+  public void shouldThrowInvalidInputExceptionIfPlayerDoesNotExist() {
+    when(playerRepository.findById(dbPlayer.getId())).thenReturn(Optional.empty());
+
+    assertThrows(InvalidInputException.class, () -> playerService.findById(dbPlayer.getId()));
   }
 }
