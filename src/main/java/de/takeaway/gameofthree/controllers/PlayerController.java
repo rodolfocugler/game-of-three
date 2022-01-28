@@ -34,7 +34,7 @@ public class PlayerController {
                   "Password must have between 6 and 20 characters.")
   })
   @PostMapping
-  public Player create(@RequestBody @Validated Player player) {
+  public PlayerDTO create(@RequestBody @Validated Player player) {
     return playerService.create(player);
   }
 

@@ -45,9 +45,9 @@ public class PlayerServiceTest {
     when(bCryptPasswordEncoder.encode("123456")).thenReturn("password");
     when(playerRepository.save(playerWithEncodedPassword)).thenReturn(dbPlayer);
 
-    Player response = playerService.create(player);
+    PlayerDTO response = playerService.create(player);
 
-    assertThat(response).isEqualTo(dbPlayer);
+    assertThat(response).isEqualTo(playerDto);
   }
 
   @Test

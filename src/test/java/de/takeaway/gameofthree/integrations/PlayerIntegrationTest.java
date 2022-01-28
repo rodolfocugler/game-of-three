@@ -44,7 +44,8 @@ public class PlayerIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.username").value(player.getUsername()))
-            .andExpect(jsonPath("$.id").value(1));
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.password").doesNotExist());
   }
 
   @Test
