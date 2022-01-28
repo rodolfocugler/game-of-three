@@ -18,13 +18,15 @@ public class Game {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id = 0;
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(cascade = CascadeType.ALL)
   private List<Move> moves;
 
   @ManyToOne
+  @JoinColumn(referencedColumnName = "id")
   private Player player1;
 
   @ManyToOne
+  @JoinColumn(referencedColumnName = "id")
   private Player player2;
 
   @Override

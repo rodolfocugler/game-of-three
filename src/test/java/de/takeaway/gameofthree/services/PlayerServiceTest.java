@@ -36,7 +36,7 @@ public class PlayerServiceTest {
   private final Player player = Player.builder().username("username").password("123456").build();
   private final Player playerWithEncodedPassword =
           Player.builder().username("username").password("password").build();
-  private final Player dbPlayer = Player.builder().username("username").password("asd").id(1)
+  private final Player dbPlayer = Player.builder().username("username").password("password").id(1)
           .build();
   private final PlayerDTO playerDto = PlayerDTO.builder().username("username").id(1).build();
 
@@ -145,11 +145,10 @@ public class PlayerServiceTest {
   @Test
   public void shouldReturnOnePlayerGivenTheId() {
     when(playerRepository.findById(dbPlayer.getId())).thenReturn(of(dbPlayer));
-    Player expectedResponse = Player.builder().username("username").id(1).build();
 
     Player response = playerService.findById(dbPlayer.getId());
 
-    assertThat(response).isEqualTo(expectedResponse);
+    assertThat(response).isEqualTo(dbPlayer);
   }
 
   @Test

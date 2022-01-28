@@ -78,8 +78,6 @@ public class PlayerService implements UserDetailsService {
     if (optionalPlayer.isEmpty()) {
       throw new InvalidInputException("Player id does not exist.");
     }
-    Player player = optionalPlayer.get();
-    player.setPassword(null);
-    return player;
+    return optionalPlayer.get();
   }
 }

@@ -27,12 +27,16 @@ class GameServiceTest {
 
   private final Player player1 = Player.builder().id(1).username("username1").build();
   private final Player player2 = Player.builder().id(2).build();
+
   @Mock
   private GameRepository gameRepository;
+
   @Mock
   private MoveService moveService;
+
   @Mock
   private PlayerService playerService;
+
   @InjectMocks
   private GameService gameService;
 

@@ -2,10 +2,7 @@ package de.takeaway.gameofthree.models;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Builder
@@ -24,6 +21,7 @@ public class Move {
 
   private int addedNumber;
 
+  @Column(name = "movement_order")
   private int order;
 
   @Override
