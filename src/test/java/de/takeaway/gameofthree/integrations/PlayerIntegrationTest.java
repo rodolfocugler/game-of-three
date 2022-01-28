@@ -30,7 +30,8 @@ public class PlayerIntegrationTest {
   private WebApplicationContext webApplicationContext;
   private MockMvc mockMvc;
   private final ObjectMapper mapper = new ObjectMapper();
-  private final Player player = Player.builder().username("username").password("123456").build();
+  private final Player player = Player.builder().username("username").isAutomaticPlayEnabled(true)
+          .password("123456").build();
 
   @BeforeEach
   public void setup() {
@@ -45,6 +46,7 @@ public class PlayerIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.username").value(player.getUsername()))
             .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.automaticPlayEnabled").value(true))
             .andExpect(jsonPath("$.password").doesNotExist());
   }
 

@@ -34,7 +34,8 @@ public class PlayerService implements UserDetailsService {
     player.setPassword(bCryptPasswordEncoder.encode(player.getPassword()));
     try {
       Player dbPlayer = playerRepository.save(player);
-      return PlayerDTO.builder().username(dbPlayer.getUsername()).id(dbPlayer.getId()).build();
+      return PlayerDTO.builder().username(dbPlayer.getUsername()).id(dbPlayer.getId())
+              .isAutomaticPlayEnabled(dbPlayer.isAutomaticPlayEnabled()).build();
     } catch (DataIntegrityViolationException ex) {
       throw new InvalidInputException("Username already exists.");
     }
@@ -70,7 +71,8 @@ public class PlayerService implements UserDetailsService {
 
   public List<PlayerDTO> get() {
     return playerRepository.findAll().stream().map(player ->
-            PlayerDTO.builder().id(player.getId()).username(player.getUsername()).build())
+            PlayerDTO.builder().id(player.getId()).username(player.getUsername())
+                    .isAutomaticPlayEnabled(player.isAutomaticPlayEnabled()).build())
             .collect(Collectors.toList());
   }
 

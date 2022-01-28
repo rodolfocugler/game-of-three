@@ -33,12 +33,14 @@ public class PlayerServiceTest {
 
   @InjectMocks
   private PlayerService playerService;
-  private final Player player = Player.builder().username("username").password("123456").build();
-  private final Player playerWithEncodedPassword =
-          Player.builder().username("username").password("password").build();
-  private final Player dbPlayer = Player.builder().username("username").password("password").id(1)
-          .build();
-  private final PlayerDTO playerDto = PlayerDTO.builder().username("username").id(1).build();
+  private final Player player = Player.builder().username("username").password("123456")
+          .isAutomaticPlayEnabled(true).build();
+  private final Player playerWithEncodedPassword = Player.builder().username("username")
+          .password("password").isAutomaticPlayEnabled(true).build();
+  private final Player dbPlayer = Player.builder().username("username").password("password")
+          .isAutomaticPlayEnabled(true).id(1).build();
+  private final PlayerDTO playerDto = PlayerDTO.builder().username("username").id(1)
+          .isAutomaticPlayEnabled(true).build();
 
   @Test
   public void shouldReturnNewPlayerIfANewPlayerIsCreated() {
