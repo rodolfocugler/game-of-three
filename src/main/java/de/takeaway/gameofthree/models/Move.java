@@ -11,30 +11,29 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-public class Player {
+public class Move {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
   private long id = 0;
 
-  @Column(nullable = false, length = 20, unique = true)
-  private String username;
+  private int number;
 
-  @Column(nullable = false)
-  private String password;
+  private int addedNumber;
+
+  @Column(name = "movement_order")
+  private int order;
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    Player player = (Player) o;
-    return id == player.id && Objects.equals(username, player.username) && Objects.equals(password, player.password);
+    Move move = (Move) o;
+    return id == move.id && number == move.number && addedNumber == move.addedNumber && order == move.order;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, username, password);
+    return Objects.hash(id, number, addedNumber, order);
   }
 }
-

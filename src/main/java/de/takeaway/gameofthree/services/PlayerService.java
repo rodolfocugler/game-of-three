@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,5 +71,13 @@ public class PlayerService implements UserDetailsService {
     return playerRepository.findAll().stream().map(player ->
             PlayerDTO.builder().id(player.getId()).username(player.getUsername()).build())
             .collect(Collectors.toList());
+  }
+
+  public Player findById(long id) {
+    Optional<Player> optionalPlayer = playerRepository.findById(id);
+    if (optionalPlayer.isEmpty()) {
+      throw new InvalidInputException("Player id does not exist.");
+    }
+    return optionalPlayer.get();
   }
 }
