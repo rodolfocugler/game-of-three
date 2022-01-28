@@ -30,11 +30,11 @@ public class PlayerControllerTest {
 
   @Test
   public void shouldReturnNewPlayerIfANewPlayerIsCreated() {
-    when(playerService.create(player)).thenReturn(dbPlayer);
+    when(playerService.create(player)).thenReturn(playerDto);
 
-    Player response = playerController.create(player);
+    PlayerDTO response = playerController.create(player);
 
-    assertThat(response).isEqualTo(dbPlayer);
+    assertThat(response).isEqualTo(playerDto);
   }
 
   @Test

@@ -28,12 +28,13 @@ public class PlayerService implements UserDetailsService {
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
   }
 
-  public Player create(Player player) {
+  public PlayerDTO create(Player player) {
     validateUsername(player.getUsername());
     validatePassword(player.getPassword());
     player.setPassword(bCryptPasswordEncoder.encode(player.getPassword()));
     try {
-      return playerRepository.save(player);
+      Player dbPlayer = playerRepository.save(player);
+      return PlayerDTO.builder().username(dbPlayer.getUsername()).id(dbPlayer.getId()).build();
     } catch (DataIntegrityViolationException ex) {
       throw new InvalidInputException("Username already exists.");
     }
