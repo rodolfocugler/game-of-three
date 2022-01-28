@@ -35,6 +35,7 @@ public class GameController {
                   "Player cannot play alone.<br />" +
                   "Player id does not exist.<br />" +
                   "First move must be higher than 3.<br />" +
+                  "It is not the turn of the player. <br />" +
                   "Added number must be {-1, 0 or 1}."),
           @ApiResponse(responseCode = "401", description = "Invalid authentication.")
   })

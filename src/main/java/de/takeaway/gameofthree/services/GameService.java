@@ -39,8 +39,17 @@ public class GameService {
   }
 
   private Game getGame(MoveRequestDTO moveRequest, Player loggedPlayer) {
-    return moveRequest.getGameId() > 0 ? findGameById(moveRequest.getGameId()) :
+    Game game = moveRequest.getGameId() > 0 ? findGameById(moveRequest.getGameId()) :
             buildNewGame(moveRequest, loggedPlayer);
+
+    Player playerTurn = game.getMoves().size() % 2 == 0 ? game.getPlayer1() : game.getPlayer2();
+
+    if (loggedPlayer.getId() != playerTurn.getId()) {
+      throw new InvalidInputException(String
+              .format("It's not the turn of the player: %s", loggedPlayer.getUsername()));
+    }
+
+    return game;
   }
 
   private Game findGameById(long id) {
@@ -57,7 +66,7 @@ public class GameService {
       throw new InvalidInputException("Player cannot play alone.");
     }
 
-    return Game.builder().moves(new ArrayList<>()).player1(loggedPlayer)
+    return Game.builder().player1(loggedPlayer).moves(new ArrayList<>())
             .player2(playerService.findById(moveRequest.getPlayerId())).build();
   }
 }

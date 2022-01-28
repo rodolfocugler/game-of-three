@@ -37,9 +37,7 @@ public class GameIntegrationTest {
   @BeforeEach
   public void setup() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-    Player player = Player.builder().id(1).username("username").build();
-    Authentication auth = new UsernamePasswordAuthenticationToken(player, null);
-    SecurityContextHolder.getContext().setAuthentication(auth);
+    setAuthentication(1);
   }
 
   @Test
@@ -67,7 +65,7 @@ public class GameIntegrationTest {
             .andExpect(status().isOk());
 
     MoveRequestDTO moveRequestDTO = MoveRequestDTO.builder().number(2).gameId(1).build();
-
+    setAuthentication(2);
     this.mockMvc.perform(post("/api/games/move")
             .content(mapper.writeValueAsString(moveRequestDTO))
             .contentType(MediaType.APPLICATION_JSON))
@@ -86,5 +84,12 @@ public class GameIntegrationTest {
               .contentType(MediaType.APPLICATION_JSON))
               .andExpect(status().isOk());
     }
+  }
+
+  private void setAuthentication(long playerId) {
+    Player player = Player.builder().id(playerId).username(String.format("username%s", playerId))
+            .build();
+    Authentication auth = new UsernamePasswordAuthenticationToken(player, null);
+    SecurityContextHolder.getContext().setAuthentication(auth);
   }
 }

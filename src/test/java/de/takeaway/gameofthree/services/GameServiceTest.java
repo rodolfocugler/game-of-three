@@ -75,9 +75,9 @@ class GameServiceTest {
                     .order(0).build(), Move.builder().order(1).number(19).addedNumber(1).build(),
             Move.builder().number(6).addedNumber(-1).id(3).order(2).build());
 
-    Game oldGame = Game.builder().moves(oldMoves).id(1).build();
-    Game newGame = Game.builder().moves(newMoves).id(1).build();
-    Game dbGame = Game.builder().moves(dbMoves).id(1).build();
+    Game oldGame = Game.builder().moves(oldMoves).player1(player1).player2(player2).id(1).build();
+    Game newGame = Game.builder().moves(newMoves).player1(player1).player2(player2).id(1).build();
+    Game dbGame = Game.builder().moves(dbMoves).player1(player1).player2(player2).id(1).build();
 
     MoveRequestDTO moveRequest = MoveRequestDTO.builder().playerId(player2.getId())
             .number(6).gameId(1).build();
@@ -98,13 +98,14 @@ class GameServiceTest {
   public void shouldPropagateExceptionIfMoveServiceThrowsException() {
     MoveRequestDTO moveRequest = MoveRequestDTO.builder().playerId(player1.getId())
             .number(18).gameId(1).build();
-    Game game = Game.builder().id(1).build();
+    Game game = Game.builder().id(1).moves(Lists.newArrayList(Move.builder().build()))
+            .player1(player1).player2(player2).build();
 
     when(gameRepository.findById(game.getId())).thenReturn(Optional.of(game));
     when(moveService.buildNextMoveForExistingGame(moveRequest, game))
             .thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class, () -> gameService.addMoveInGame(moveRequest, player1));
+    assertThrows(RuntimeException.class, () -> gameService.addMoveInGame(moveRequest, player2));
   }
 
   @Test
@@ -132,5 +133,17 @@ class GameServiceTest {
 
     when(playerService.findById(player2.getId())).thenThrow(new InvalidInputException("dummy"));
     assertThrows(RuntimeException.class, () -> gameService.addMoveInGame(moveRequest, player1));
+  }
+
+  @Test
+  public void shouldThrowInvalidInputExceptionIfPlayerMakeAMoveWhenItIsNotHisTurn() {
+    MoveRequestDTO moveRequest = MoveRequestDTO.builder().playerId(player2.getId())
+            .number(6).gameId(1).build();
+    Game game = Game.builder().id(1).player1(player1).player2(player2)
+            .moves(Lists.newArrayList(Move.builder().number(18).build())).build();
+
+    when(gameRepository.findById(game.getId())).thenReturn(Optional.of(game));
+
+    assertThrows(InvalidInputException.class, () -> gameService.addMoveInGame(moveRequest, player1));
   }
 }
