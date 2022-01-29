@@ -3,6 +3,7 @@ package de.takeaway.gameofthree.services;
 import de.takeaway.gameofthree.dtos.MoveRequestDTO;
 import de.takeaway.gameofthree.dtos.MoveResponseDTO;
 import de.takeaway.gameofthree.exceptions.InvalidInputException;
+import de.takeaway.gameofthree.exceptions.NotFoundException;
 import de.takeaway.gameofthree.models.Game;
 import de.takeaway.gameofthree.models.Move;
 import de.takeaway.gameofthree.models.Player;
@@ -55,7 +56,7 @@ public class GameService {
   private Game findGameById(long id) {
     Optional<Game> game = gameRepository.findById(id);
     if (game.isEmpty()) {
-      throw new InvalidInputException("Game id does not exist.");
+      throw new NotFoundException("Game id does not exist.");
     }
 
     return game.get();

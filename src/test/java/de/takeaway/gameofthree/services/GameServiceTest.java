@@ -3,6 +3,7 @@ package de.takeaway.gameofthree.services;
 import de.takeaway.gameofthree.dtos.MoveRequestDTO;
 import de.takeaway.gameofthree.dtos.MoveResponseDTO;
 import de.takeaway.gameofthree.exceptions.InvalidInputException;
+import de.takeaway.gameofthree.exceptions.NotFoundException;
 import de.takeaway.gameofthree.models.Game;
 import de.takeaway.gameofthree.models.Move;
 import de.takeaway.gameofthree.models.Player;
@@ -117,13 +118,13 @@ class GameServiceTest {
   }
 
   @Test
-  public void shouldThrowInvalidInputExceptionIfGameDoesNotExist() {
+  public void shouldThrowNotFoundExceptionIfGameDoesNotExist() {
     MoveRequestDTO moveRequest = MoveRequestDTO.builder().playerId(player1.getId())
             .number(18).gameId(1).build();
 
     when(gameRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(InvalidInputException.class, () -> gameService.addMoveInGame(moveRequest, player1));
+    assertThrows(NotFoundException.class, () -> gameService.addMoveInGame(moveRequest, player1));
   }
 
   @Test

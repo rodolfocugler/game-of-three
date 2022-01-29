@@ -3,15 +3,13 @@ package de.takeaway.gameofthree.integrations;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.takeaway.gameofthree.dtos.MoveRequestDTO;
 import de.takeaway.gameofthree.models.Player;
+import de.takeaway.gameofthree.utils.AuthenticationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -37,7 +35,7 @@ public class GameIntegrationTest {
   @BeforeEach
   public void setup() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-    setAuthentication(1);
+    AuthenticationUtil.setAuthentication(1);
   }
 
   @Test
@@ -65,7 +63,7 @@ public class GameIntegrationTest {
             .andExpect(status().isOk());
 
     MoveRequestDTO moveRequestDTO = MoveRequestDTO.builder().number(2).gameId(1).build();
-    setAuthentication(2);
+    AuthenticationUtil.setAuthentication(2);
     this.mockMvc.perform(post("/api/games/move")
             .content(mapper.writeValueAsString(moveRequestDTO))
             .contentType(MediaType.APPLICATION_JSON))
@@ -86,10 +84,4 @@ public class GameIntegrationTest {
     }
   }
 
-  private void setAuthentication(long playerId) {
-    Player player = Player.builder().id(playerId).username(String.format("username%s", playerId))
-            .build();
-    Authentication auth = new UsernamePasswordAuthenticationToken(player, null);
-    SecurityContextHolder.getContext().setAuthentication(auth);
-  }
 }
