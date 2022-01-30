@@ -1,7 +1,9 @@
 package de.takeaway.gameofthree.services;
 
+import de.takeaway.gameofthree.dtos.GameDTO;
 import de.takeaway.gameofthree.dtos.MoveRequestDTO;
 import de.takeaway.gameofthree.dtos.MoveResponseDTO;
+import de.takeaway.gameofthree.dtos.PlayerDTO;
 import de.takeaway.gameofthree.exceptions.InvalidInputException;
 import de.takeaway.gameofthree.exceptions.NotFoundException;
 import de.takeaway.gameofthree.models.Game;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.of;
@@ -183,5 +186,86 @@ class GameServiceTest {
     MoveResponseDTO moveResponse = gameService.addMoveInGame(moveRequest, player1);
 
     assertThat(moveResponse).isEqualTo(expectedMoveResponse);
+  }
+
+  @Test
+  public void shouldNotAddANewMoveIfTheNextPlayerCanPlayAutomaticButGameIsOver() {
+    Player automaticPlayer2 = Player.builder().id(2).isAutomaticPlayEnabled(true).build();
+
+    ArrayList<Move> oldMoves = Lists.newArrayList(Move.builder().order(0).number(3).addedNumber(0)
+            .build());
+    ArrayList<Move> newMoves = Lists.newArrayList(Move.builder().number(3).addedNumber(0)
+            .order(0).build(), Move.builder().order(1).number(1).addedNumber(1).build());
+    ArrayList<Move> dbMoves = Lists.newArrayList(Move.builder().number(3).addedNumber(0)
+            .order(0).build(), Move.builder().order(1).number(1).addedNumber(1).build());
+
+    Game oldGame = Game.builder().moves(oldMoves).player1(automaticPlayer2).player2(player1).id(1)
+            .build();
+    Game newGame = Game.builder().moves(newMoves).player1(automaticPlayer2).player2(player1).id(1)
+            .winner(player1).build();
+    Game dbGame = Game.builder().moves(dbMoves).player1(automaticPlayer2).player2(player1).id(1)
+            .winner(player1).build();
+
+    MoveRequestDTO moveRequest = MoveRequestDTO.builder().playerId(automaticPlayer2.getId())
+            .number(1).gameId(1).build();
+    MoveResponseDTO expectedMoveResponse = MoveResponseDTO.builder().resultingNumber(1)
+            .addedNumber(1).build();
+
+    when(gameRepository.findById(newGame.getId())).thenReturn(of(oldGame));
+    when(moveService.buildNextMoveForExistingGame(moveRequest, oldGame))
+            .thenReturn(newMoves.get(newMoves.size() - 1));
+    when(gameRepository.save(newGame)).thenReturn(dbGame);
+
+    MoveResponseDTO moveResponse = gameService.addMoveInGame(moveRequest, player1);
+
+    assertThat(moveResponse).isEqualTo(expectedMoveResponse);
+  }
+
+  @Test
+  public void shouldThrowInvalidInputExceptionIfGameIsOver() {
+    MoveRequestDTO moveRequest = MoveRequestDTO.builder().playerId(player2.getId())
+            .number(6).gameId(1).build();
+    Game game = Game.builder().id(1).player1(player1).player2(player2).winner(player1).build();
+
+    when(gameRepository.findById(game.getId())).thenReturn(Optional.of(game));
+
+    assertThrows(InvalidInputException.class, () -> gameService.addMoveInGame(moveRequest, player1));
+  }
+
+  @Test
+  public void shouldReturnAListOfAvailableGames() {
+    ArrayList<Move> moves = Lists.newArrayList(Move.builder().order(0).number(3).addedNumber(0)
+            .build());
+    Game game = Game.builder().id(1).player1(player1).player2(player2).moves(moves)
+            .build();
+    PlayerDTO player1Dto = PlayerDTO.builder().id(1).username("username1").build();
+    PlayerDTO player2Dto = PlayerDTO.builder().id(2).build();
+    GameDTO gameDTO = GameDTO.builder().moves(moves).id(1).player1(player1Dto).player2(player2Dto)
+            .build();
+
+    when(playerService.mapToPlayerDTO(player1)).thenReturn(player1Dto);
+    when(playerService.mapToPlayerDTO(player2)).thenReturn(player2Dto);
+    when(gameRepository.findAllByPlayer1IdOrPlayer2Id_AndWinnerIsNull(1, 1))
+            .thenReturn(List.of(game));
+
+    assertThat(gameService.getAvailableGames(player1)).isEqualTo(List.of(gameDTO));
+  }
+
+  @Test
+  public void shouldReturnAListOfAllGames() {
+    ArrayList<Move> moves = Lists.newArrayList(Move.builder().order(0).number(3).addedNumber(0)
+            .build());
+    Game game = Game.builder().id(1).player1(player1).player2(player2).winner(player1).moves(moves)
+            .build();
+    PlayerDTO player1Dto = PlayerDTO.builder().id(1).username("username1").build();
+    PlayerDTO player2Dto = PlayerDTO.builder().id(2).build();
+    GameDTO gameDTO = GameDTO.builder().moves(moves).id(1).player1(player1Dto).player2(player2Dto)
+            .winner(player1Dto).build();
+
+    when(playerService.mapToPlayerDTO(player1)).thenReturn(player1Dto);
+    when(playerService.mapToPlayerDTO(player2)).thenReturn(player2Dto);
+    when(gameRepository.findAllByPlayer1IdOrPlayer2Id(1, 1)).thenReturn(List.of(game));
+
+    assertThat(gameService.getAllGames(player1)).isEqualTo(List.of(gameDTO));
   }
 }

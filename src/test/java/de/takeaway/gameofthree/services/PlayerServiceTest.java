@@ -233,4 +233,9 @@ public class PlayerServiceTest {
             () -> playerService.update(dbPlayer.getId(), playerToUpdate, dbPlayer));
     assertThat(exception.getMessage()).isEqualTo("Password must have between 6 and 20 characters.");
   }
+
+  @Test
+  public void shouldReturnPlayerDTOGivenAPlayer() {
+    assertThat(playerService.mapToPlayerDTO(dbPlayer)).isEqualTo(playerDto);
+  }
 }

@@ -58,8 +58,8 @@ class MoveServiceTest {
   }
 
   @Test
-  public void shouldThrowInvalidInputExceptionIfNumberIsLessThan4() {
-    MoveRequestDTO moveRequest = MoveRequestDTO.builder().number(3).gameId(1).build();
+  public void shouldThrowInvalidInputExceptionIfNumberIsLessThan2() {
+    MoveRequestDTO moveRequest = MoveRequestDTO.builder().number(1).gameId(1).build();
 
     assertThrows(InvalidInputException.class,
             () -> moveService.buildFirstMoveForANewGame(moveRequest));

@@ -29,16 +29,20 @@ public class Game {
   @JoinColumn(referencedColumnName = "id")
   private Player player2;
 
+  @ManyToOne
+  @JoinColumn(referencedColumnName = "id")
+  private Player winner;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Game game = (Game) o;
-    return id == game.id && Objects.equals(moves, game.moves) && Objects.equals(player1, game.player1) && Objects.equals(player2, game.player2);
+    return id == game.id && Objects.equals(moves, game.moves) && Objects.equals(player1, game.player1) && Objects.equals(player2, game.player2) && Objects.equals(winner, game.winner);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, moves, player1, player2);
+    return Objects.hash(id, moves, player1, player2, winner);
   }
 }
