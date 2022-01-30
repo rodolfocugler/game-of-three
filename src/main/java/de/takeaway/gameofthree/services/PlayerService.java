@@ -104,4 +104,9 @@ public class PlayerService implements UserDetailsService {
     return PlayerDTO.builder().username(dbPlayer.getUsername()).id(dbPlayer.getId())
             .isAutomaticPlayEnabled(dbPlayer.isAutomaticPlayEnabled()).build();
   }
+
+  public PlayerDTO mapToPlayerDTO(Player player) {
+    return PlayerDTO.builder().id(player.getId()).username(player.getUsername())
+            .isAutomaticPlayEnabled(player.isAutomaticPlayEnabled()).build();
+  }
 }

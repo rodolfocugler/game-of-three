@@ -1,5 +1,6 @@
 package de.takeaway.gameofthree.controllers;
 
+import de.takeaway.gameofthree.dtos.GameDTO;
 import de.takeaway.gameofthree.dtos.MoveRequestDTO;
 import de.takeaway.gameofthree.dtos.MoveResponseDTO;
 import de.takeaway.gameofthree.models.Player;
@@ -11,10 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/games")
@@ -44,5 +44,31 @@ public class GameController {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     Player loggedPlayer = (Player) authentication.getPrincipal();
     return gameService.addMoveInGame(moveRequest, loggedPlayer);
+  }
+
+  @Operation(summary = "Get available games",
+          description = "Get games from a player that are not finished yet")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "List of available games"),
+          @ApiResponse(responseCode = "401", description = "Invalid authentication.")
+  })
+  @GetMapping("/available")
+  public List<GameDTO> getAvailableGames() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Player loggedPlayer = (Player) authentication.getPrincipal();
+    return gameService.getAvailableGames(loggedPlayer);
+  }
+
+  @Operation(summary = "Get all games",
+          description = "Get all games from a logged player")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "List of all games"),
+          @ApiResponse(responseCode = "401", description = "Invalid authentication.")
+  })
+  @GetMapping("/all")
+  public List<GameDTO> getAllGames() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Player loggedPlayer = (Player) authentication.getPrincipal();
+    return gameService.getAllGames(loggedPlayer);
   }
 }

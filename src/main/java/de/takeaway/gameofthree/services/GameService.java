@@ -1,5 +1,6 @@
 package de.takeaway.gameofthree.services;
 
+import de.takeaway.gameofthree.dtos.GameDTO;
 import de.takeaway.gameofthree.dtos.MoveRequestDTO;
 import de.takeaway.gameofthree.dtos.MoveResponseDTO;
 import de.takeaway.gameofthree.exceptions.InvalidInputException;
@@ -11,7 +12,9 @@ import de.takeaway.gameofthree.repositories.GameRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GameService {
@@ -95,5 +98,25 @@ public class GameService {
 
   private Player getNextTurnPlayer(Game game) {
     return game.getMoves().size() % 2 != 0 ? game.getPlayer1() : game.getPlayer2();
+  }
+
+  public List<GameDTO> getAvailableGames(Player loggedPlayer) {
+    return gameRepository
+            .findAllByPlayer1IdOrPlayer2Id_AndWinnerIsNull(loggedPlayer.getId(), loggedPlayer.getId())
+            .stream().map(this::mapToGameDTO).collect(Collectors.toList());
+  }
+
+  private GameDTO mapToGameDTO(Game game) {
+    return GameDTO.builder().id(game.getId()).moves(game.getMoves())
+            .winner(game.getWinner() != null
+                    ? playerService.mapToPlayerDTO(game.getPlayer1())
+                    : null)
+            .player1(playerService.mapToPlayerDTO(game.getPlayer1()))
+            .player2(playerService.mapToPlayerDTO(game.getPlayer2())).build();
+  }
+
+  public List<GameDTO> getAllGames(Player loggedPlayer) {
+    return gameRepository.findAllByPlayer1IdOrPlayer2Id(loggedPlayer.getId(), loggedPlayer.getId())
+            .stream().map(this::mapToGameDTO).collect(Collectors.toList());
   }
 }
