@@ -45,6 +45,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers("/swagger-ui.html").permitAll()
             .antMatchers("/swagger-ui/**").permitAll()
             .antMatchers("/v3/api-docs/**").permitAll()
+            .antMatchers("/game-websocket/**").permitAll()
+            .antMatchers("/game-websocket").permitAll()
             .anyRequest().authenticated()
             .and()
             .exceptionHandling()

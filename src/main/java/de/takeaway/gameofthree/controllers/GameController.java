@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
@@ -22,9 +23,11 @@ import java.util.List;
 public class GameController {
 
   private final GameService gameService;
+  private final SimpMessagingTemplate simpMessagingTemplate;
 
-  public GameController(GameService gameService) {
+  public GameController(GameService gameService, SimpMessagingTemplate simpMessagingTemplate) {
     this.gameService = gameService;
+    this.simpMessagingTemplate = simpMessagingTemplate;
   }
 
   @Operation(summary = "Add move to a game",
@@ -43,7 +46,10 @@ public class GameController {
   public MoveResponseDTO addMove(@RequestBody @Validated MoveRequestDTO moveRequest) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     Player loggedPlayer = (Player) authentication.getPrincipal();
-    return gameService.addMoveInGame(moveRequest, loggedPlayer);
+    MoveResponseDTO moveResponse = gameService.addMoveInGame(moveRequest, loggedPlayer);
+    simpMessagingTemplate
+            .convertAndSend(String.format("/game/%s", moveRequest.getPlayerId()), moveResponse);
+    return moveResponse;
   }
 
   @Operation(summary = "Get available games",
