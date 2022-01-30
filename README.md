@@ -1,7 +1,7 @@
 # Game Of Three
 
 The project is a java rest-api application resulted from 
-the Game of Three assignment shared by takeaway company.
+the Game of Three assignment shared by JustEatTakeAway company.
 
 ### Important
 
