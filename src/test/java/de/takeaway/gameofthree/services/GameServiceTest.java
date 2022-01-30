@@ -184,4 +184,48 @@ class GameServiceTest {
 
     assertThat(moveResponse).isEqualTo(expectedMoveResponse);
   }
+
+  @Test
+  public void shouldNotAddANewMoveIfTheNextPlayerCanPlayAutomaticButGameIsOver() {
+    Player automaticPlayer2 = Player.builder().id(2).isAutomaticPlayEnabled(true).build();
+
+    ArrayList<Move> oldMoves = Lists.newArrayList(Move.builder().order(0).number(3).addedNumber(0)
+            .build());
+    ArrayList<Move> newMoves = Lists.newArrayList(Move.builder().number(3).addedNumber(0)
+                    .order(0).build(), Move.builder().order(1).number(1).addedNumber(1).build());
+    ArrayList<Move> dbMoves = Lists.newArrayList(Move.builder().number(3).addedNumber(0)
+                    .order(0).build(), Move.builder().order(1).number(1).addedNumber(1).build());
+
+    Game oldGame = Game.builder().moves(oldMoves).player1(automaticPlayer2).player2(player1).id(1)
+            .build();
+    Game newGame = Game.builder().moves(newMoves).player1(automaticPlayer2).player2(player1).id(1)
+            .winner(player1).build();
+    Game dbGame = Game.builder().moves(dbMoves).player1(automaticPlayer2).player2(player1).id(1)
+            .winner(player1).build();
+
+    MoveRequestDTO moveRequest = MoveRequestDTO.builder().playerId(automaticPlayer2.getId())
+            .number(1).gameId(1).build();
+    MoveResponseDTO expectedMoveResponse = MoveResponseDTO.builder().resultingNumber(1)
+            .addedNumber(1).build();
+
+    when(gameRepository.findById(newGame.getId())).thenReturn(of(oldGame));
+    when(moveService.buildNextMoveForExistingGame(moveRequest, oldGame))
+            .thenReturn(newMoves.get(newMoves.size() - 1));
+    when(gameRepository.save(newGame)).thenReturn(dbGame);
+
+    MoveResponseDTO moveResponse = gameService.addMoveInGame(moveRequest, player1);
+
+    assertThat(moveResponse).isEqualTo(expectedMoveResponse);
+  }
+
+  @Test
+  public void shouldThrowInvalidInputExceptionIfGameIsOver() {
+    MoveRequestDTO moveRequest = MoveRequestDTO.builder().playerId(player2.getId())
+            .number(6).gameId(1).build();
+    Game game = Game.builder().id(1).player1(player1).player2(player2).winner(player1).build();
+
+    when(gameRepository.findById(game.getId())).thenReturn(Optional.of(game));
+
+    assertThrows(InvalidInputException.class, () -> gameService.addMoveInGame(moveRequest, player1));
+  }
 }

@@ -12,7 +12,7 @@ import java.util.Comparator;
 public class MoveService {
 
   public Move buildFirstMoveForANewGame(MoveRequestDTO moveRequest) {
-    if (moveRequest.getNumber() < 4) {
+    if (moveRequest.getNumber() < 2) {
       throw new InvalidInputException("First move must be higher than 3.");
     }
     return Move.builder().number(moveRequest.getNumber()).build();

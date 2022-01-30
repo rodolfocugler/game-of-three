@@ -34,9 +34,9 @@ public class GameService {
             moveService.buildNextMoveForExistingGame(moveRequest, game);
 
     Player nextPlayer = getNextTurnPlayer(game);
-    game.getMoves().add(move);
-    if (nextPlayer.isAutomaticPlayEnabled()) {
-      game.getMoves().add(moveService.buildAnAutomaticMove(move));
+    addMoveInGame(game, move);
+    if (nextPlayer.isAutomaticPlayEnabled() && game.getWinner() == null) {
+      addMoveInGame(game, moveService.buildAnAutomaticMove(move));
     }
 
     gameRepository.save(game);
@@ -44,16 +44,31 @@ public class GameService {
             .resultingNumber(move.getNumber()).build();
   }
 
+  private void addMoveInGame(Game game, Move move) {
+    if (move.getNumber() == 1) {
+      game.setWinner(getCurrentTurnPlayer(game));
+    }
+    game.getMoves().add(move);
+  }
+
   private Game getGame(MoveRequestDTO moveRequest, Player loggedPlayer) {
     Game game = moveRequest.getGameId() > 0 ? findGameById(moveRequest.getGameId()) :
             buildNewGame(moveRequest, loggedPlayer);
+
+    checkIfAMoveCanBeAddedToAGame(game, loggedPlayer);
+
+    return game;
+  }
+
+  private void checkIfAMoveCanBeAddedToAGame(Game game, Player loggedPlayer) {
+    if (game.getWinner() != null) {
+      throw new InvalidInputException(String.format("The game %s is over", game.getId()));
+    }
 
     if (loggedPlayer.getId() != getCurrentTurnPlayer(game).getId()) {
       throw new InvalidInputException(String
               .format("It's not the turn of the player: %s", loggedPlayer.getUsername()));
     }
-
-    return game;
   }
 
   private Game findGameById(long id) {
