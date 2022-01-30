@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,7 +21,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class GameControllerTest {
@@ -32,11 +33,17 @@ class GameControllerTest {
   private final Player player = Player.builder().username("username").id(1).build();
 
   @Mock
-  Authentication authentication;
+  private SimpMessagingTemplate simpMessagingTemplate;
+
   @Mock
-  SecurityContext securityContext;
+  private Authentication authentication;
+
+  @Mock
+  private SecurityContext securityContext;
+
   @Mock
   private GameService gameService;
+
   @InjectMocks
   private GameController gameController;
 
@@ -50,6 +57,8 @@ class GameControllerTest {
     MoveResponseDTO moveResponse = gameController.addMove(moveRequest);
 
     assertThat(moveResponse).isEqualTo(dbMoveResponse);
+    verify(simpMessagingTemplate, times(1))
+            .convertAndSend("/game/2", dbMoveResponse);
   }
 
   @Test
