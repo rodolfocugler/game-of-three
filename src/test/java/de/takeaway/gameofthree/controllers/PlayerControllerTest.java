@@ -3,6 +3,7 @@ package de.takeaway.gameofthree.controllers;
 import de.takeaway.gameofthree.dtos.PlayerDTO;
 import de.takeaway.gameofthree.models.Player;
 import de.takeaway.gameofthree.services.PlayerService;
+import de.takeaway.gameofthree.utils.AuthenticationUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,7 @@ public class PlayerControllerTest {
   private PlayerController playerController;
 
   private final Player player = Player.builder().username("username").build();
-  private final Player dbPlayer = Player.builder().username("username").id(1).build();
+  private final Player dbPlayer = Player.builder().username("username1").id(1).build();
   private final PlayerDTO playerDto = PlayerDTO.builder().username("username").id(1).build();
 
   @Test
@@ -52,5 +53,21 @@ public class PlayerControllerTest {
     List<PlayerDTO> response = playerController.get();
 
     assertThat(response).isEqualTo(players);
+  }
+
+  @Test
+  public void shouldReturnTheUpdatedPlayerIfAPlayerIsUpdated() {
+    when(playerService.update(dbPlayer.getId(), dbPlayer, dbPlayer)).thenReturn(playerDto);
+    AuthenticationUtil.setAuthentication(dbPlayer.getId());
+    PlayerDTO response = playerController.update(dbPlayer, dbPlayer.getId());
+
+    assertThat(response).isEqualTo(playerDto);
+  }
+
+  @Test
+  public void shouldPropagateExceptionIfServiceThrowsAnExceptionForUpdateMethod() {
+    when(playerService.update(player.getId(), player, player)).thenThrow(new RuntimeException());
+    AuthenticationUtil.setAuthentication(player.getId());
+    assertThrows(RuntimeException.class, () -> playerController.update(player, player.getId()));
   }
 }

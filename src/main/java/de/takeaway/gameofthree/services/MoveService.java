@@ -31,4 +31,18 @@ public class MoveService {
     return Move.builder().number(moveRequest.getNumber()).addedNumber(addedNumber)
             .order(lastMove.getOrder() + 1).build();
   }
+
+  public Move buildAnAutomaticMove(Move lastMove) {
+    int addedNumber = getAddedNumber(lastMove.getNumber());
+    int number = (addedNumber + lastMove.getNumber()) / 3;
+    return Move.builder().number(number).addedNumber(addedNumber).order(lastMove.getOrder() + 1)
+            .build();
+  }
+
+  private int getAddedNumber(int lastNumber) {
+    int numberMode3 = lastNumber % 3;
+    if (numberMode3 == 2) return 1;
+    else if (numberMode3 == 1) return -1;
+    else return 0;
+  }
 }

@@ -2,7 +2,9 @@ package de.takeaway.gameofthree.services;
 
 import de.takeaway.gameofthree.dtos.PlayerAuthenticationDTO;
 import de.takeaway.gameofthree.dtos.PlayerDTO;
+import de.takeaway.gameofthree.exceptions.ForbiddenException;
 import de.takeaway.gameofthree.exceptions.InvalidInputException;
+import de.takeaway.gameofthree.exceptions.NotFoundException;
 import de.takeaway.gameofthree.models.Player;
 import de.takeaway.gameofthree.repositories.PlayerRepository;
 import org.junit.jupiter.api.Test;
@@ -33,12 +35,14 @@ public class PlayerServiceTest {
 
   @InjectMocks
   private PlayerService playerService;
-  private final Player player = Player.builder().username("username").password("123456").build();
-  private final Player playerWithEncodedPassword =
-          Player.builder().username("username").password("password").build();
-  private final Player dbPlayer = Player.builder().username("username").password("password").id(1)
-          .build();
-  private final PlayerDTO playerDto = PlayerDTO.builder().username("username").id(1).build();
+  private final Player player = Player.builder().username("username").password("123456")
+          .isAutomaticPlayEnabled(true).build();
+  private final Player playerWithEncodedPassword = Player.builder().username("username")
+          .password("password").isAutomaticPlayEnabled(true).build();
+  private final Player dbPlayer = Player.builder().username("username").password("password")
+          .isAutomaticPlayEnabled(true).id(1).build();
+  private final PlayerDTO playerDto = PlayerDTO.builder().username("username").id(1)
+          .isAutomaticPlayEnabled(true).build();
 
   @Test
   public void shouldReturnNewPlayerIfANewPlayerIsCreated() {
@@ -79,28 +83,28 @@ public class PlayerServiceTest {
   }
 
   @Test
-  public void shouldThrowInvalidInputExceptionIfPasswordIsNull() {
+  public void shouldThrowInvalidInputExceptionIfPasswordIsNullWhenCreatingPlayer() {
     InvalidInputException exception = assertThrows(InvalidInputException.class,
             () -> playerService.create(Player.builder().username("dummy").build()));
     assertThat(exception.getMessage()).isEqualTo("Password cannot be null or empty.");
   }
 
   @Test
-  public void shouldThrowInvalidInputExceptionIfPasswordIsEmpty() {
+  public void shouldThrowInvalidInputExceptionIfPasswordIsEmptyWhenCreatingPlayer() {
     InvalidInputException exception = assertThrows(InvalidInputException.class,
             () -> playerService.create(Player.builder().username("dummy").password("").build()));
     assertThat(exception.getMessage()).isEqualTo("Password cannot be null or empty.");
   }
 
   @Test
-  public void shouldThrowInvalidInputExceptionIfPasswordIsWhitespace() {
+  public void shouldThrowInvalidInputExceptionIfPasswordIsWhitespaceWhenCreatingPlayer() {
     InvalidInputException exception = assertThrows(InvalidInputException.class,
             () -> playerService.create(Player.builder().username("dummy").password("   ").build()));
     assertThat(exception.getMessage()).isEqualTo("Password cannot be null or empty.");
   }
 
   @Test
-  public void shouldThrowInvalidInputExceptionIfPasswordHasMoreThan20Characters() {
+  public void shouldThrowInvalidInputExceptionIfPasswordHasMoreThan20CharactersWhenCreatingPlayer() {
     InvalidInputException exception = assertThrows(InvalidInputException.class,
             () -> playerService.create(Player.builder().username("dummy")
                     .password("012345678901234567890").build()));
@@ -108,7 +112,7 @@ public class PlayerServiceTest {
   }
 
   @Test
-  public void shouldThrowInvalidInputExceptionIfPasswordHasLessThan6Characters() {
+  public void shouldThrowInvalidInputExceptionIfPasswordHasLessThan6CharactersWhenCreatingPlayer() {
     InvalidInputException exception = assertThrows(InvalidInputException.class,
             () -> playerService.create(Player.builder().username("dummy").password("123").build()));
     assertThat(exception.getMessage()).isEqualTo("Password must have between 6 and 20 characters.");
@@ -152,9 +156,81 @@ public class PlayerServiceTest {
   }
 
   @Test
-  public void shouldThrowInvalidInputExceptionIfPlayerDoesNotExist() {
+  public void shouldThrowNotFoundExceptionIfPlayerDoesNotExist() {
     when(playerRepository.findById(dbPlayer.getId())).thenReturn(Optional.empty());
 
-    assertThrows(InvalidInputException.class, () -> playerService.findById(dbPlayer.getId()));
+    assertThrows(NotFoundException.class, () -> playerService.findById(dbPlayer.getId()));
+  }
+
+  @Test
+  public void shouldThrowForbiddenExceptionIfPlayerLoggedIsDifferentOfThePlayerUpdated() {
+    assertThrows(ForbiddenException.class,
+            () -> playerService.update(dbPlayer.getId() + 1, dbPlayer, dbPlayer));
+  }
+
+  @Test
+  public void shouldThrowForbiddenExceptionIfPlayerTryToUpdateUsername() {
+    when(playerRepository.findById(dbPlayer.getId())).thenReturn(of(dbPlayer));
+
+    Player playerToUpdate = Player.builder().username("dummy").password("password")
+            .isAutomaticPlayEnabled(true).id(1).build();
+
+    assertThrows(ForbiddenException.class,
+            () -> playerService.update(dbPlayer.getId(), playerToUpdate, dbPlayer));
+  }
+
+  @Test
+  public void shouldReturnTheUpdatedPlayer() {
+    when(bCryptPasswordEncoder.encode("123456")).thenReturn("password");
+    when(playerRepository.save(playerWithEncodedPassword)).thenReturn(dbPlayer);
+
+    PlayerDTO response = playerService.create(player);
+
+    assertThat(response).isEqualTo(playerDto);
+  }
+
+  @Test
+  public void shouldThrowInvalidInputExceptionIfPasswordIsNullWhenUpdatingPlayer() {
+    Player playerToUpdate = Player.builder().username(dbPlayer.getUsername()).id(dbPlayer.getId())
+            .build();
+    InvalidInputException exception = assertThrows(InvalidInputException.class,
+            () -> playerService.update(dbPlayer.getId(), playerToUpdate, dbPlayer));
+    assertThat(exception.getMessage()).isEqualTo("Password cannot be null or empty.");
+  }
+
+  @Test
+  public void shouldThrowInvalidInputExceptionIfPasswordIsEmptyWhenUpdatingPlayer() {
+    Player playerToUpdate = Player.builder().username(dbPlayer.getUsername()).id(dbPlayer.getId())
+            .password("").build();
+    InvalidInputException exception = assertThrows(InvalidInputException.class,
+            () -> playerService.update(dbPlayer.getId(), playerToUpdate, dbPlayer));
+    assertThat(exception.getMessage()).isEqualTo("Password cannot be null or empty.");
+  }
+
+  @Test
+  public void shouldThrowInvalidInputExceptionIfPasswordIsWhitespaceWhenUpdatingPlayer() {
+    Player playerToUpdate = Player.builder().username(dbPlayer.getUsername()).id(dbPlayer.getId())
+            .password("   ").build();
+    InvalidInputException exception = assertThrows(InvalidInputException.class,
+            () -> playerService.update(dbPlayer.getId(), playerToUpdate, dbPlayer));
+    assertThat(exception.getMessage()).isEqualTo("Password cannot be null or empty.");
+  }
+
+  @Test
+  public void shouldThrowInvalidInputExceptionIfPasswordHasMoreThan20CharactersWhenUpdatingPlayer() {
+    Player playerToUpdate = Player.builder().username(dbPlayer.getUsername()).id(dbPlayer.getId())
+            .password("012345678901234567890").build();
+    InvalidInputException exception = assertThrows(InvalidInputException.class,
+            () -> playerService.update(dbPlayer.getId(), playerToUpdate, dbPlayer));
+    assertThat(exception.getMessage()).isEqualTo("Password must have between 6 and 20 characters.");
+  }
+
+  @Test
+  public void shouldThrowInvalidInputExceptionIfPasswordHasLessThan6CharactersWhenUpdatingPlayer() {
+    Player playerToUpdate = Player.builder().username(dbPlayer.getUsername()).id(dbPlayer.getId())
+            .password("123").build();
+    InvalidInputException exception = assertThrows(InvalidInputException.class,
+            () -> playerService.update(dbPlayer.getId(), playerToUpdate, dbPlayer));
+    assertThat(exception.getMessage()).isEqualTo("Password must have between 6 and 20 characters.");
   }
 }

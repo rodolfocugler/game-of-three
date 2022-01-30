@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +38,23 @@ public class PlayerController {
   @PostMapping
   public PlayerDTO create(@RequestBody @Validated Player player) {
     return playerService.create(player);
+  }
+
+  @Operation(summary = "Update a player",
+          description = "Update a player in the project")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Player updated successfully"),
+          @ApiResponse(responseCode = "400", description = "Username cannot be updated.<br />" +
+                  "Password cannot be null or empty.<br />" +
+                  "Password must have between 6 and 20 characters."),
+          @ApiResponse(responseCode = "403", description = "Player cannot update another player."),
+          @ApiResponse(responseCode = "401", description = "Invalid authentication.")
+  })
+  @PutMapping("/{playerId}")
+  public PlayerDTO update(@RequestBody @Validated Player player, @PathVariable long playerId) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Player loggedPlayer = (Player) authentication.getPrincipal();
+    return playerService.update(playerId, player, loggedPlayer);
   }
 
   @Operation(summary = "List of Players",

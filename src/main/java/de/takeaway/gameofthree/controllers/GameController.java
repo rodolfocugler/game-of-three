@@ -31,13 +31,13 @@ public class GameController {
           description = "Add a move in a new game or in an existing one")
   @ApiResponses(value = {
           @ApiResponse(responseCode = "200", description = "Move created successfully"),
-          @ApiResponse(responseCode = "400", description = "Game id does not exist.<br />" +
-                  "Player cannot play alone.<br />" +
-                  "Player id does not exist.<br />" +
+          @ApiResponse(responseCode = "400", description = "Player cannot play alone.<br />" +
                   "First move must be higher than 3.<br />" +
                   "It is not the turn of the player. <br />" +
                   "Added number must be {-1, 0 or 1}."),
-          @ApiResponse(responseCode = "401", description = "Invalid authentication.")
+          @ApiResponse(responseCode = "401", description = "Invalid authentication."),
+          @ApiResponse(responseCode = "404", description = "Game id does not exist.<br />" +
+                  "Player id does not exist.")
   })
   @PostMapping("/move")
   public MoveResponseDTO addMove(@RequestBody @Validated MoveRequestDTO moveRequest) {

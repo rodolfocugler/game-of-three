@@ -64,4 +64,31 @@ class MoveServiceTest {
     assertThrows(InvalidInputException.class,
             () -> moveService.buildFirstMoveForANewGame(moveRequest));
   }
+
+  @Test
+  public void shouldReturnAnAutomaticMoveWhenAddedNumberIs0() {
+    Move lastMove = Move.builder().number(6).addedNumber(0).order(1).build();
+    Move expectedMove = Move.builder().number(2).addedNumber(0).order(2).build();
+
+    Move move = moveService.buildAnAutomaticMove(lastMove);
+    assertThat(move).isEqualTo(expectedMove);
+  }
+
+  @Test
+  public void shouldReturnAnAutomaticMoveWhenAddedNumberIs1() {
+    Move lastMove = Move.builder().number(5).addedNumber(0).order(1).build();
+    Move expectedMove = Move.builder().number(2).addedNumber(1).order(2).build();
+
+    Move move = moveService.buildAnAutomaticMove(lastMove);
+    assertThat(move).isEqualTo(expectedMove);
+  }
+
+  @Test
+  public void shouldReturnAnAutomaticMoveWhenAddedNumberIsMinus1() {
+    Move lastMove = Move.builder().number(7).addedNumber(0).order(1).build();
+    Move expectedMove = Move.builder().number(2).addedNumber(-1).order(2).build();
+
+    Move move = moveService.buildAnAutomaticMove(lastMove);
+    assertThat(move).isEqualTo(expectedMove);
+  }
 }

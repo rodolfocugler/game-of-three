@@ -24,6 +24,9 @@ public class Player {
   @Column(nullable = false)
   private String password;
 
+  @Column
+  private boolean isAutomaticPlayEnabled;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

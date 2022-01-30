@@ -12,17 +12,18 @@ import java.util.Objects;
 public class PlayerDTO {
   private long id;
   private String username;
+  private boolean isAutomaticPlayEnabled;
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     PlayerDTO playerDTO = (PlayerDTO) o;
-    return id == playerDTO.id && Objects.equals(username, playerDTO.username);
+    return id == playerDTO.id && isAutomaticPlayEnabled == playerDTO.isAutomaticPlayEnabled && Objects.equals(username, playerDTO.username);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, username);
+    return Objects.hash(id, username, isAutomaticPlayEnabled);
   }
 }
