@@ -33,7 +33,12 @@ public class GameService {
             moveService.buildFirstMoveForANewGame(moveRequest) :
             moveService.buildNextMoveForExistingGame(moveRequest, game);
 
+    Player nextPlayer = getNextTurnPlayer(game);
     game.getMoves().add(move);
+    if (nextPlayer.isAutomaticPlayEnabled()) {
+      game.getMoves().add(moveService.buildAnAutomaticMove(move));
+    }
+
     gameRepository.save(game);
     return MoveResponseDTO.builder().addedNumber(move.getAddedNumber())
             .resultingNumber(move.getNumber()).build();
@@ -43,9 +48,7 @@ public class GameService {
     Game game = moveRequest.getGameId() > 0 ? findGameById(moveRequest.getGameId()) :
             buildNewGame(moveRequest, loggedPlayer);
 
-    Player playerTurn = game.getMoves().size() % 2 == 0 ? game.getPlayer1() : game.getPlayer2();
-
-    if (loggedPlayer.getId() != playerTurn.getId()) {
+    if (loggedPlayer.getId() != getCurrentTurnPlayer(game).getId()) {
       throw new InvalidInputException(String
               .format("It's not the turn of the player: %s", loggedPlayer.getUsername()));
     }
@@ -69,5 +72,13 @@ public class GameService {
 
     return Game.builder().player1(loggedPlayer).moves(new ArrayList<>())
             .player2(playerService.findById(moveRequest.getPlayerId())).build();
+  }
+
+  private Player getCurrentTurnPlayer(Game game) {
+    return game.getMoves().size() % 2 == 0 ? game.getPlayer1() : game.getPlayer2();
+  }
+
+  private Player getNextTurnPlayer(Game game) {
+    return game.getMoves().size() % 2 != 0 ? game.getPlayer1() : game.getPlayer2();
   }
 }

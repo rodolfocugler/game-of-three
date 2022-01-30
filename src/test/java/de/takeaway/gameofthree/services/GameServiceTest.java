@@ -147,4 +147,41 @@ class GameServiceTest {
 
     assertThrows(InvalidInputException.class, () -> gameService.addMoveInGame(moveRequest, player1));
   }
+
+  @Test
+  public void shouldAddANewMoveIfTheNextPlayerCanPlayAutomatic() {
+    Player automaticPlayer2 = Player.builder().id(2).isAutomaticPlayEnabled(true).build();
+
+    ArrayList<Move> oldMoves = Lists.newArrayList(Move.builder().order(0).number(56).addedNumber(0)
+            .build());
+    ArrayList<Move> newMoves = Lists.newArrayList(Move.builder().number(56).addedNumber(0)
+                    .order(0).build(), Move.builder().order(1).number(19).addedNumber(1).build(),
+            Move.builder().number(6).addedNumber(-1).order(2).build());
+    ArrayList<Move> dbMoves = Lists.newArrayList(Move.builder().number(56).addedNumber(0)
+                    .order(0).build(), Move.builder().order(1).number(19).addedNumber(1).build(),
+            Move.builder().number(6).addedNumber(-1).id(3).order(2).build());
+
+    Game oldGame = Game.builder().moves(oldMoves).player1(automaticPlayer2).player2(player1).id(1)
+            .build();
+    Game newGame = Game.builder().moves(newMoves).player1(automaticPlayer2).player2(player1).id(1)
+            .build();
+    Game dbGame = Game.builder().moves(dbMoves).player1(automaticPlayer2).player2(player1).id(1)
+            .build();
+
+    MoveRequestDTO moveRequest = MoveRequestDTO.builder().playerId(automaticPlayer2.getId())
+            .number(19).gameId(1).build();
+    MoveResponseDTO expectedMoveResponse = MoveResponseDTO.builder().resultingNumber(19)
+            .addedNumber(1).build();
+
+    when(gameRepository.findById(newGame.getId())).thenReturn(of(oldGame));
+    when(moveService.buildNextMoveForExistingGame(moveRequest, oldGame))
+            .thenReturn(newMoves.get(newMoves.size() - 2));
+    when(moveService.buildAnAutomaticMove(newMoves.get(newMoves.size() - 2)))
+            .thenReturn(newMoves.get(newMoves.size() - 1));
+    when(gameRepository.save(newGame)).thenReturn(dbGame);
+
+    MoveResponseDTO moveResponse = gameService.addMoveInGame(moveRequest, player1);
+
+    assertThat(moveResponse).isEqualTo(expectedMoveResponse);
+  }
 }
